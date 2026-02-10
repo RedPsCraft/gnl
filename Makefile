@@ -1,16 +1,15 @@
-NAME = libftprintf.a
+NAME = gnl.a
 
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 
-SRC = \
-	get_next_line_utils.c ; get_next_line.c 
+SRC = get_next_line_utils.c get_next_line.c 
 OBJ = $(SRC:.c=.o)
 
 all: $(NAME)
 
 $(NAME): $(OBJ)
-	ar rcs $(NAME) $(OBJ)
+	$(CC) $(CFLAGS) $(OBJ) -o $(NAME) 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 clean:

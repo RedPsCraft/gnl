@@ -6,132 +6,118 @@
 /*   By: jloechle <jloechle@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/01 12:10:15 by jloechle          #+#    #+#             */
-/*   Updated: 2025/12/18 13:14:54 by jloechle         ###   ########.fr       */
+/*   Updated: 2026/02/10 15:56:22 by jloechle         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include <stdio.h>
-#include <stddef.h>
-#include <fcntl.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include "get_next_line.h"
 
-static char	*fill_line(int fd, char **left_c, char *buffer);
-static char	*set_line(char *line_buff);
-char	*gnl_join_free(char *s1, char *s2);
-
-char	*get_next_line(int fd)
+static char	*free_reset(char **s)
 {
-	char			*buffer;
-	static char		*left_c;
-	char			*line;
-
-	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+	if (s && *s)
 	{
-		free(left_c);
-		left_c = NULL;
-		return (NULL);
+		free(*s);
+		*s = NULL;
 	}
-
-	buffer = malloc((size_t)BUFFER_SIZE + 1);
-	if (!buffer)
-		return (NULL);
-
-	line = fill_line(fd, &left_c, buffer);
-	free(buffer);
-	return (line);
+	return (NULL);
 }
 
-static int	read_to_left(int fd, char **left_c, char *buffer)
+static int	read_to_left(int fd, char **left, char *buf)
 {
 	ssize_t	br;
 
 	br = 1;
-	while (br > 0 && !ft_strchr(*left_c, '\n'))
+	while (br > 0 && !ft_strchr(*left, '\n'))
 	{
-		br = read(fd, buffer, BUFFER_SIZE);
+		br = read(fd, buf, BUFFER_SIZE);
 		if (br < 0)
 			return (-1);
-		buffer[br] = '\0';
-		*left_c = gnl_join_free(*left_c, buffer);
-		if (!*left_c)
+		buf[br] = '\0';
+		*left = ft_strjoin_free(*left, buf);
+		if (!*left)
 			return (-1);
 	}
 	return ((int)br);
 }
 
-static	char	*extract_line_and_update_left(char **left_c)
+static char	*split_line(char **left)
 {
+	char	*nl;
 	char	*line;
-	char	*tmp;
+	char	*new_left;
 
-	if ((*left_c)[0] == '\0')
-		return (NULL);
-	tmp = ft_strdup(*left_c);
-	if (!tmp)
-		return (NULL);
-	free(*left_c);
-	*left_c = set_line(tmp);
-	line = tmp;
+	if (!*left || (*left)[0] == '\0')
+		return (free_reset(left));
+	nl = ft_strchr(*left, '\n');
+	if (!nl)
+	{
+		line = ft_strdup(*left);
+		free_reset(left);
+		return (line);
+	}
+	line = ft_substr(*left, 0, (size_t)(nl - *left) + 1);
+	if (!line)
+		return (free_reset(left));
+	new_left = ft_strdup(nl + 1);
+	free(*left);
+	*left = new_left;
+	if (*left && (*left)[0] == '\0')
+		free_reset(left);
 	return (line);
 }
 
-static	char	*fill_line(int fd, char **left_c, char *buffer)
+char	*get_next_line(int fd)
 {
-	int	br;
+	static char	*left;
+	char		*buf;
+	int			br;
 
-	if (!*left_c)
-		*left_c = ft_strdup("");
-	if (!*left_c)
+	if (fd < 0 || BUFFER_SIZE <= 0 || read(fd, 0, 0) < 0)
+		return (free_reset(&left));
+	if (!left)
+		left = ft_strdup("");
+	if (!left)
 		return (NULL);
-	br = read_to_left(fd, left_c, buffer);
+	buf = (char *)malloc((size_t)BUFFER_SIZE + 1);
+	if (!buf)
+		return (free_reset(&left));
+	br = read_to_left(fd, &left, buf);
+	free(buf);
 	if (br < 0)
-		return (free(*left_c), *left_c = NULL, NULL);
-	if (br == 0 && (*left_c)[0] == '\0')
-		return (free(*left_c), *left_c = NULL, NULL);
-	return (extract_line_and_update_left(left_c));
+		return (free_reset(&left));
+	if (br == 0 && left && left[0] == '\0')
+		return (free_reset(&left));
+	return (split_line(&left));
 }
 
+//#include "get_next_line.h"
+//#include <fcntl.h>
+//#include <stdio.h>
 
-static char	*set_line(char *line_buff)
-{
-	ssize_t	i;
-	char	*left_c;
+//int main(int argc, char **argv)
+//{
+//    int     fd;
+//    char    *line;
 
-	i = 0;
-	while (line_buff[i] != '\n' && line_buff[i] != '\0')
-		i++;
+//    if (argc != 2)
+//    {
+//        printf("Usage: %s <filename>\n", argv[0]);
+//        return (1);
+//    }
 
+//    fd = open(argv[1], O_RDONLY);
+//    if (fd < 0)
+//    {
+//        printf("Error opening file\n");
+//        return (1);
+//    }
 
-	if (line_buff[i] == '\0')
-		return (NULL);
-	if (line_buff[i + 1] == '\0')
-	{
-		line_buff[i + 1] = '\0';
-		return (NULL);
-	}
+//    while ((line = get_next_line(fd)) != NULL)
+//    {
+//        printf("%s", line);
+//        free(line);  // Important: free each line after use!
+//    }
 
-	left_c = ft_substr(line_buff, i + 1, ft_strlen(line_buff) - (i + 1));
-	if (left_c && *left_c == '\0')
-	{
-		free(left_c);
-		left_c = NULL;
-	}
-	line_buff[i + 1] = '\0';
-	return (left_c);
-}
-
-{char	*gnl_join_free(char *s1, char *s2)
-
-	char	*res;
-
-	if (!s1 || !s2)
-	{
-		free(s1);
-		return (NULL);
-	}
-	res = ft_strjoin(s1, s2);
-	free(s1);
-	return (res);
-}
+//    close(fd);
+//    return (0);
+//}

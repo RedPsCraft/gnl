@@ -6,166 +6,111 @@
 /*   By: jloechle <jloechle@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/08 18:44:44 by jloechle          #+#    #+#             */
-/*   Updated: 2025/12/17 11:52:03 by jloechle         ###   ########.fr       */
+/*   Updated: 2025/12/23 13:33:18 by jloechle         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
+size_t	ft_strlen(const char *s)
+{
+	size_t	i;
+
+	i = 0;
+	if (!s)
+		return (0);
+	while (s[i])
+		i++;
+	return (i);
+}
+
 char	*ft_strchr(const char *s, int c)
 {
-	int		i;
-	char	cc;
+	size_t	i;
 
-	cc = (char)c;
+	if (!s)
+		return (NULL);
 	i = 0;
 	while (s[i])
 	{
-		if (s[i] == cc)
+		if (s[i] == (char)c)
 			return ((char *)&s[i]);
 		i++;
 	}
-	if (s[i] == cc)
-		return ((char *) &s[i]);
+	if (s[i] == (char)c)
+		return ((char *)&s[i]);
 	return (NULL);
 }
 
-
-
-size_t	ft_strlen(const	char	*str)
+char	*ft_strdup(const char *s)
 {
-	size_t	count;
+	size_t	i;
+	size_t	len;
+	char	*dup;
 
-	count = 0;
-	while (*str != '\0')
+	if (!s)
+		return (NULL);
+	len = ft_strlen(s);
+	dup = (char *)malloc(len + 1);
+	if (!dup)
+		return (NULL);
+	i = 0;
+	while (i < len)
 	{
-		str ++;
-		count ++;
+		dup[i] = s[i];
+		i++;
 	}
-	return (count);
+	dup[i] = '\0';
+	return (dup);
 }
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
 	size_t	i;
-	char	*temp;
+	size_t	slen;
+	char	*sub;
 
-	i = 0;
-	if (s == NULL)
-		return (NULL);
-	if (start > ft_strlen(s))
-		return (ft_strdup(""));
 	if (!s)
 		return (NULL);
-	if (len > ft_strlen(s + start))
-		len = ft_strlen(s + start);
-	temp = ft_calloc(len + 1, sizeof(char));
-	if (!temp)
+	slen = ft_strlen(s);
+	if (start >= slen)
+		return (ft_strdup(""));
+	if (len > slen - start)
+		len = slen - start;
+	sub = (char *)malloc(len + 1);
+	if (!sub)
 		return (NULL);
 	i = 0;
 	while (i < len)
 	{
-		temp[i] = s[start + i];
+		sub[i] = s[start + i];
 		i++;
 	}
-	return (temp);
+	sub[i] = '\0';
+	return (sub);
 }
 
-char	*ft_strjoin(char *s1, char *s2)
+char	*ft_strjoin_free(char *s1, char *s2)
 {
-	size_t	tot_len;
-	char	*temp;
-
-	if (s1 == NULL || s2 == NULL)
-		return (NULL);
-	tot_len = (ft_strlen(s1) + ft_strlen(s2)) + 1;
-	temp = malloc(tot_len);
-	if (!temp)
-		return (NULL);
-	temp[0] = '\0';
-	ft_strlcat(temp, s1, tot_len);
-	ft_strlcat(temp, s2, tot_len);
-	return (temp);
-}
-
-void	*ft_calloc(size_t nmemb, size_t size)
-{
-	size_t			i;
-	unsigned char	*p;
-
-	i = 0;
-	p = malloc(nmemb * size);
-	if (!p)
-		return (NULL);
-	while (i < (nmemb * size))
-		p[i++] = 0;
-	return (p);
-}
-
-size_t	ft_strlcat(char *dst, const char *src, size_t size)
-{
-	size_t	len_dst;
-	size_t	len_src;
 	size_t	i;
+	size_t	j;
+	size_t	l1;
+	size_t	l2;
+	char	*res;
 
-	len_dst = ft_strlen(dst);
-	len_src = ft_strlen(src);
-	i = 0;
-	if (size <= len_dst)
-		return (size + len_src);
-	while (src[i] && (len_dst + i) < (size - 1))
-	{
-		dst[len_dst + i] = src[i];
-		i++;
-	}
-	dst[len_dst + i] = '\0';
-	return (len_dst + len_src);
+	if (!s1 || !s2)
+		return (free(s1), NULL);
+	l1 = ft_strlen(s1);
+	l2 = ft_strlen(s2);
+	res = (char *)malloc(l1 + l2 + 1);
+	if (!res)
+		return (free(s1), NULL);
+	i = -1;
+	while (++i < l1)
+		res[i] = s1[i];
+	j = -1;
+	while (++j < l2)
+		res[i + j] = s2[j];
+	res[i + j] = '\0';
+	return (free(s1), res);
 }
-
-char	*gnl_split_line(char **left)
-{
-	char	*nl;
-	char	*line;
-	char	*new_left;
-	size_t	line_len;
-	size_t	rest_len;
-	size_t	i;
-
-	if (!left || !*left || (*left)[0] == '\0')
-		return (NULL);
-
-	nl = ft_strchr(*left, '\n');
-	line_len = nl ? (size_t)(nl - *left) + 1 : ft_strlen(*left);
-
-	line = (char *)malloc(line_len + 1);
-	if (!line)
-		return (NULL);
-	i = 0;
-	while (i < line_len)
-	{
-		line[i] = (*left)[i];
-		i++;
-	}
-	line[i] = '\0';
-
-	if (!nl || nl[1] == '\0')
-		return (free(*left), *left = NULL, line);
-
-	rest_len = ft_strlen(nl + 1);
-	new_left = (char *)malloc(rest_len + 1);
-	if (!new_left)
-		return (free(line), NULL);
-	i = 0;
-	while (i < rest_len)
-	{
-		new_left[i] = nl[1 + i];
-		i++;
-	}
-	new_left[i] = '\0';
-
-	free(*left);
-	*left = new_left;
-	return (line);
-}
-
-
