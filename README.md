@@ -7,10 +7,12 @@ Get Next Line reads and returns one line at a time from a file descriptor. This 
 **Goal:** Create a function that reads a file line by line through successive calls, handling any BUFFER_SIZE and edge cases (empty files, missing trailing newline, etc.).
 
 ## Instructions
+Uncomment main in "get_next_line.c"
 
 **Compilation:**
 ```bash
-gcc -Wall -Wextra -Werror -D BUFFER_SIZE=42 get_next_line.c get_next_line_utils.c main.c -o gnl
+make
+./gnl.a <file.name> <number of calls of function(optionnal)>
 ```
 
 ## Resources

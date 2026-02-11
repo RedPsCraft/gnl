@@ -6,7 +6,7 @@
 /*   By: jloechle <jloechle@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/01 12:10:15 by jloechle          #+#    #+#             */
-/*   Updated: 2026/02/10 15:56:22 by jloechle         ###   ########.fr       */
+/*   Updated: 2026/02/11 11:28:25 by jloechle         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,31 +93,52 @@ char	*get_next_line(int fd)
 //#include "get_next_line.h"
 //#include <fcntl.h>
 //#include <stdio.h>
+//#include <unistd.h>
+//#include <stdlib.h>
+//#include <limits.h>
 
-//int main(int argc, char **argv)
+//int	main(int argc, char **argv)
 //{
-//    int     fd;
-//    char    *line;
+//	int		fd;
+//	char	*line;
+//	int		max_lines;
+//	int		count;
 
-//    if (argc != 2)
-//    {
-//        printf("Usage: %s <filename>\n", argv[0]);
-//        return (1);
-//    }
+//	fd = 0;
+//	max_lines = INT_MAX;
+//	count = 0;
 
-//    fd = open(argv[1], O_RDONLY);
-//    if (fd < 0)
-//    {
-//        printf("Error opening file\n");
-//        return (1);
-//    }
+//	if (argc >= 2)
+//	{
+//		fd = open(argv[1], O_RDONLY);
+//		if (fd < 0)
+//		{
+//			perror("open");
+//			return (1);
+//		}
+//	}
 
-//    while ((line = get_next_line(fd)) != NULL)
-//    {
-//        printf("%s", line);
-//        free(line);  // Important: free each line after use!
-//    }
+//	if (argc >= 3)
+//	{
+//		long tmp = atol(argv[2]);
 
-//    close(fd);
-//    return (0);
+//		if (tmp < 0)
+//			tmp = 0;
+//		if (tmp > INT_MAX)
+//			tmp = INT_MAX;
+//		max_lines = (int)tmp;
+//	}
+
+//	printf("FD: %d | max_lines: %d\n", fd, max_lines);
+
+//	while (count < max_lines && (line = get_next_line(fd)) != NULL)
+//	{
+//		printf("%s", line);
+//		free(line);
+//		count++;
+//	}
+
+//	if (fd > 0)
+//		close(fd);
+//	return (0);
 //}
